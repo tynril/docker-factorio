@@ -36,7 +36,7 @@ run_save_upload() {
 				checksum=`echo $line | cut -d " " -f3`
 				break
 			fi
-		done < `tail -n +2 "$FACTORIO_DIR/saves/downloaded_saves"`
+		done < tail -n +2 "$FACTORIO_DIR/saves/downloaded_saves"
 
 		# If we did, update it.
 		if [ $found == 1 ]; then
