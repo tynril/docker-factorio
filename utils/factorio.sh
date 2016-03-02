@@ -39,9 +39,11 @@ fi
 mkdir "$FACTORIO_DIR/saves"
 
 # Get the latest version of the saves from Google drive
+echo Looking for a Google Drive folder named $GDRIVE_FACTORIO_FOLDER_NAME...
 GDRIVE_FACTORIO_FOLDER_FILE_ID=`$GDRIVE_UTIL list --no-header --query "name contains '$GDRIVE_FACTORIO_FOLDER_NAME' and trashed = false" -m 1 | cut -d " " -f1`
+echo Folder found with identifier $GDRIVE_FACTORIO_FOLDER_FILE_ID
 echo $GDRIVE_FACTORIO_FOLDER_FILE_ID > "$FACTORIO_DIR/saves/downloaded_saves"
-for save in `$GDRIVE_UTIL list --no-header --query "name contains '.zip' and '$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and trashed = false" | cut -d " " -f1`; do
+for save in `$GDRIVE_UTIL list --no-header --query "'$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and trashed = false" | cut -d " " -f1`; do
 	filename=`$GDRIVE_UTIL download --no-progress --force --path "$FACTORIO_DIR/saves" $save | head -n 1 | cut -d " " -f2`
 	checksum=`$GDRIVE_UTIL info $save | grep Md5sum | cut -d " " -f2`
 	echo Found save file on Google Drive $filename, id $save, checksum $checksum
