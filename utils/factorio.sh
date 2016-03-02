@@ -44,7 +44,7 @@ echo $GDRIVE_FACTORIO_FOLDER_FILE_ID > "$FACTORIO_DIR/saves/downloaded_saves"
 for save in `$GDRIVE_UTIL list --no-header --query "name contains '.zip' and '$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and trashed = false" | cut -d " " -f1`; do
 	filename=`$GDRIVE_UTIL download --no-progress --force --path "$FACTORIO_DIR/saves" $save | head -n 1 | cut -d " " -f2`
 	checksum=`$GDRIVE_UTIL info $save | grep Md5sum | cut -d " " -f2`
-	echo Found save file on Google Drive ($filename, id $save, checksum $checsum)
+	echo Found save file on Google Drive $filename, id $save, checksum $checksum
 	echo $save $filename $checksum >> "$FACTORIO_DIR/saves/downloaded_saves"
 done
 
