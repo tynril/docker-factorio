@@ -93,7 +93,7 @@ factoriopid=$!
 # Run saves at an interval
 echo Server started with PID $factoriopid
 while :; do
-    sleep 15 &
+    sleep $GDRIVE_UPLOAD_SAVES_FREQUENCY_SEC &
     sleeppid=$!
     wait $sleeppid
     echo Executing regular save upload...
