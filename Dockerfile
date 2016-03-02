@@ -13,6 +13,8 @@ ENV GDRIVE_UPLOAD_SAVES_FREQUENCY_SEC 300
 ADD utils/factorio.sh /opt/factorio/factorio.sh
 ADD utils/factorio_upload_save.sh /opt/factorio/factorio_upload_save.sh
 
+STOPSIGNAL SIGINT
+
 RUN cd /opt \
 	&& wget --no-check-certificate "https://www.factorio.com/get-download/$FACTORIO_VERSION/headless/linux64" -O factorio.tar.gz \
 	&& tar xzf factorio.tar.gz \

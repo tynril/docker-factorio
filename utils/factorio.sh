@@ -74,17 +74,28 @@ if [ ! -f "$FACTORIO_DIR/saves/$FACTORIO_SAVE_NAME.zip" ]; then
 	"$FACTORIO_DIR/bin/x64/factorio" --create $FACTORIO_SAVE_NAME
 fi
 
-# Check if any of the autosave is more recent than the proper one.
-
-
-# Start the background save uploader.
-"$FACTORIO_DIR/factorio_upload_save.sh" --background &
+# Trap the interruption
+handle_int() {
+    echo Interrupted!
+    [[ $sleeppid ]] && kill $sleeppid
+    kill -s INT $factoriopid
+    wait $factoriopid
+    echo Executing final save upload...
+    "$FACTORIO_DIR/factorio_upload_save.sh"
+    exit 0
+}
+trap handle_int SIGINT SIGTERM SIGKILL
 
 # Run the server
-"$FACTORIO_DIR/bin/x64/factorio" --start-server $FACTORIO_SAVE_NAME $FACTORIO_SERVER_ARGS
+"$FACTORIO_DIR/bin/x64/factorio" --start-server $FACTORIO_SAVE_NAME $FACTORIO_SERVER_ARGS &
+factoriopid=$!
 
-# Kill the background save
-kill $!
-
-# Upload the saves after the server ended
-"$FACTORIO_DIR/factorio_upload_save.sh"
+# Run saves at an interval
+echo Server started with PID $factoriopid
+while :; do
+    sleep 15 &
+    sleeppid=$!
+    wait $sleeppid
+    echo Executing regular save upload...
+    "$FACTORIO_DIR/factorio_upload_save.sh"
+done
