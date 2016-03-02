@@ -19,6 +19,7 @@ if [ -z "$FACTORIO_SERVER_ARGS" ]; then
 	error=1
 fi
 
+# Exit if something bad happened
 if [ $error == 1 ]; then
 	echo Errors were detected, aborting.
 	exit 1
