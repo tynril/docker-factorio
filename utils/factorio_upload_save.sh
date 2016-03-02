@@ -24,7 +24,7 @@ GDRIVE_UTIL="/opt/gdrive --refresh-token $GDRIVE_REFRESH_TOKEN"
 # Function that does the saves upload
 run_save_upload() {
 	GDRIVE_FACTORIO_FOLDER_FILE_ID=`cat $FACTORIO_DIR/saves/downloaded_saves | head -n 1`
-	for filename in "$FACTORIO_DIR/saves/*.zip"; do
+	for filename in $FACTORIO_DIR/saves/*.zip; do
 		# Check if we knew about this file already.
 		found=0
 		{
