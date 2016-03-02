@@ -43,17 +43,39 @@ echo Looking for a Google Drive folder named $GDRIVE_FACTORIO_FOLDER_NAME...
 GDRIVE_FACTORIO_FOLDER_FILE_ID=`$GDRIVE_UTIL list --no-header --query "name contains '$GDRIVE_FACTORIO_FOLDER_NAME' and trashed = false" -m 1 | cut -d " " -f1`
 echo Folder found with identifier $GDRIVE_FACTORIO_FOLDER_FILE_ID
 echo $GDRIVE_FACTORIO_FOLDER_FILE_ID > "$FACTORIO_DIR/saves/downloaded_saves"
+touch -d '-10 years' "$FACTORIO_DIR/saves/newest_save"
 for save in `$GDRIVE_UTIL list --no-header --query "'$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and trashed = false" | cut -d " " -f1`; do
 	filename=`$GDRIVE_UTIL download --no-progress --force --path "$FACTORIO_DIR/saves" $save | head -n 1 | cut -d " " -f2`
-	checksum=`$GDRIVE_UTIL info $save | grep Md5sum | cut -d " " -f2`
-	echo Found save file on Google Drive $filename, id $save, checksum $checksum
+    checksum=`$GDRIVE_UTIL info $save | grep Md5sum | cut -d " " -f2`
+    modifieddate=`$GDRIVE_UTIL info $save | grep Modified | cut -d " " -f2-3`
+    modified=`date --date="$modifieddate" +"%s"`
+    touch -d @$modified "$FACTORIO_DIR/saves/$filename"
+    
+    if [ "$FACTORIO_DIR/saves/$filename" -nt "$FACTORIO_DIR/saves/newest_save" ]; then
+        echo $filename > "$FACTORIO_DIR/saves/newest_save"
+        touch -d @$modified "$FACTORIO_DIR/saves/newest_save"
+    fi
+    
+    echo Found save file on Google Drive $filename, id $save, checksum $checksum
 	echo $save $filename $checksum >> "$FACTORIO_DIR/saves/downloaded_saves"
 done
+
+# Restore the most recent save.
+newestsave=`cat "$FACTORIO_DIR/saves/newest_save"`
+if [ "$newestsave" != "$FACTORIO_SAVE_NAME.zip" ]; then
+    echo Restoring newest save $newestsave
+    cp -rf "$FACTORIO_DIR/saves/$newestsave" "$FACTORIO_DIR/saves/$FACTORIO_SAVE_NAME.zip"
+else
+    echo $FACTORIO_SAVE_NAME is the newest save, no auto-save restoration
+fi
 
 # Check if no save exists, in which case, create one.
 if [ ! -f "$FACTORIO_DIR/saves/$FACTORIO_SAVE_NAME.zip" ]; then
 	"$FACTORIO_DIR/bin/x64/factorio" --create $FACTORIO_SAVE_NAME
 fi
+
+# Check if any of the autosave is more recent than the proper one.
+
 
 # Start the background save uploader.
 "$FACTORIO_DIR/factorio_upload_save.sh" --background &
