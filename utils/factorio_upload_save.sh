@@ -48,9 +48,11 @@ run_save_upload() {
 			if [ "$storedchecksum" == "$checksum" ]; then
 				echo $filename has not changed, skipping.
 			else
+				echo $filename has changed, updating.
 				$GDRIVE_UTIL update --no-progress $fileid $filename
 			fi
 		else
+			echo $filename is a new save, uploading.
 			$GDRIVE_UTIL upload --no-progress --parent $GDRIVE_FACTORIO_FOLDER_FILE_ID $filename
 		fi
 	done
