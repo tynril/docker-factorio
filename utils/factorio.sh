@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo Factorio management script version 1.0
+
 # Safety checks
 error=0
 if [ -z "$GDRIVE_REFRESH_TOKEN" ]; then

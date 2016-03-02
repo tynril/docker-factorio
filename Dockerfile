@@ -16,13 +16,13 @@ ADD utils/factorio_upload_save.sh /opt/factorio/factorio_upload_save.sh
 STOPSIGNAL SIGINT
 
 RUN cd /opt \
-	&& wget --no-check-certificate "https://www.factorio.com/get-download/$FACTORIO_VERSION/headless/linux64" -O factorio.tar.gz \
+	&& wget -nv --no-check-certificate "https://www.factorio.com/get-download/$FACTORIO_VERSION/headless/linux64" -O factorio.tar.gz \
 	&& tar xzf factorio.tar.gz \
 	&& rm factorio.tar.gz \
 	&& chmod +x /opt/factorio/bin/x64/factorio \
 	&& chmod +x /opt/factorio/factorio.sh \
 	&& chmod +x /opt/factorio/factorio_upload_save.sh \
-	&& wget "https://docs.google.com/uc?id=0B3X9GlR6EmbnWksyTEtCM0VfaFE&export=download" -O /opt/gdrive \
+	&& wget -nv "https://docs.google.com/uc?id=0B3X9GlR6EmbnWksyTEtCM0VfaFE&export=download" -O /opt/gdrive \
 	&& chmod +x /opt/gdrive
 
 CMD ["bash", "-c", "/opt/factorio/factorio.sh"]
