@@ -27,16 +27,19 @@ run_save_upload() {
 	for filename in "$FACTORIO_DIR/saves/*.zip"; do
 		# Check if we knew about this file already.
 		found=0
-		while read line; do
-			storedsavename=`echo $line | cut -d " " -f2`
-			savename=`basename "$filename"`
-			if [ "$storedsavename" == "$savename" ]; then
-				found=1
-				fileid=`echo $line | cut -d " " -f1`
-				checksum=`echo $line | cut -d " " -f3`
-				break
-			fi
-		done < tail -n +2 "$FACTORIO_DIR/saves/downloaded_saves"
+		{
+			read;	# Skip the first line
+			while read line; do
+				storedsavename=`echo $line | cut -d " " -f2`
+				savename=`basename "$filename"`
+				if [ "$storedsavename" == "$savename" ]; then
+					found=1
+					fileid=`echo $line | cut -d " " -f1`
+					checksum=`echo $line | cut -d " " -f3`
+					break
+				fi
+			done
+		} < "$FACTORIO_DIR/saves/downloaded_saves"
 
 		# If we did, update it.
 		if [ $found == 1 ]; then
