@@ -28,7 +28,9 @@ run_save_upload() {
 		# Check if we knew about this file already.
 		found=0
 		while read line; do
-			if [ "`echo $line | cut -d ' ' -f2`" == "`basename $filename`" ]; then
+			storedsavename=`echo $line | cut -d " " -f2`
+			savename=`basename "$filename"`
+			if [ "$storedsavename" == "$savename" ]; then
 				found=1
 				fileid=`echo $line | cut -d " " -f1`
 				checksum=`echo $line | cut -d " " -f3`
@@ -39,7 +41,8 @@ run_save_upload() {
 		# If we did, update it.
 		if [ $found == 1 ]; then
 			# Verify if the checksum has changed.
-			if [ "`md5sum $filename | cut -d ' ' -f1`" == "$checksum" ]; then
+			storedchecksum=`md5sum $filename | cut -d " " -f1`
+			if [ "$storedchecksum" == "$checksum" ]; then
 				echo $filename has not changed, skipping.
 			else
 				$GDRIVE_UTIL update --no-progress $fileid $filename
