@@ -40,10 +40,15 @@ if [ -d "$FACTORIO_DIR/saves" ]; then
 fi
 mkdir "$FACTORIO_DIR/saves"
 
-# Get the latest version of the saves from Google drive
+# Look for the root saves folder on Drive
 echo Looking for a Google Drive folder named $GDRIVE_FACTORIO_FOLDER_NAME...
-GDRIVE_FACTORIO_FOLDER_FILE_ID=`$GDRIVE_UTIL list --no-header --query "name contains '$GDRIVE_FACTORIO_FOLDER_NAME' and trashed = false" -m 1 | cut -d " " -f1`
-echo Folder found with identifier $GDRIVE_FACTORIO_FOLDER_FILE_ID
+GDRIVE_FACTORIO_FOLDER_FILE_ID=`$GDRIVE_UTIL list --no-header --query "name contains '$GDRIVE_FACTORIO_FOLDER_NAME' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" -m 1 | cut -d " " -f1`
+if [ "$GDRIVE_FACTORIO_FOLDER_FILE_ID" == "" ];then
+    echo FATAL: Unable to find a folder named $GDRIVE_FACTORIO_FOLDER_NAME on Google Drive.
+    exit 1
+fi
+
+# Get the latest version of the saves from Google drive
 echo $GDRIVE_FACTORIO_FOLDER_FILE_ID > "$FACTORIO_DIR/saves/downloaded_saves"
 touch -d '-10 years' "$FACTORIO_DIR/saves/newest_save"
 for save in `$GDRIVE_UTIL list --no-header --query "'$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and trashed = false" | cut -d " " -f1`; do
