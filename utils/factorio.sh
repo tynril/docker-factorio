@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo Factorio management script version 1.0.4
+echo Factorio management script version 1.0.5
 
 # Safety checks
 error=0
@@ -42,7 +42,7 @@ mkdir "$FACTORIO_DIR/saves"
 
 # Look for the root saves folder on Drive
 echo Looking for a Google Drive folder named $GDRIVE_FACTORIO_FOLDER_NAME...
-GDRIVE_FACTORIO_FOLDER_FILE_ID=`$GDRIVE_UTIL list --no-header --query "name contains '$GDRIVE_FACTORIO_FOLDER_NAME' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" -m 1 | cut -d " " -f1`
+GDRIVE_FACTORIO_FOLDER_FILE_ID=`$GDRIVE_UTIL list --no-header --query "name = '$GDRIVE_FACTORIO_FOLDER_NAME' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" -m 1 | cut -d " " -f1`
 if [ "$GDRIVE_FACTORIO_FOLDER_FILE_ID" == "" ];then
     echo FATAL: Unable to find a folder named $GDRIVE_FACTORIO_FOLDER_NAME on Google Drive.
     exit 1
