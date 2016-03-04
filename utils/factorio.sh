@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo Factorio management script version 1.0
+echo Factorio management script version 1.0.4
 
 # Safety checks
 error=0
@@ -63,13 +63,16 @@ for save in `$GDRIVE_UTIL list --no-header --query "'$GDRIVE_FACTORIO_FOLDER_FIL
 done
 
 # Restore the most recent save.
-newestsave=`cat "$FACTORIO_DIR/saves/newest_save"`
-if [ "$newestsave" != "$FACTORIO_SAVE_NAME.zip" ]; then
-    echo Restoring newest save $newestsave
-    cp -rf "$FACTORIO_DIR/saves/$newestsave" "$FACTORIO_DIR/saves/$FACTORIO_SAVE_NAME.zip"
-else
-    echo $FACTORIO_SAVE_NAME is the newest save, no auto-save restoration
+if [ -s "$FACTORIO_DIR/saves/newest_save" ]; then
+    newestsave=`cat "$FACTORIO_DIR/saves/newest_save"`
+    if [ "$newestsave" != "$FACTORIO_SAVE_NAME.zip" ]; then
+        echo Restoring newest save $newestsave
+        cp -rf "$FACTORIO_DIR/saves/$newestsave" "$FACTORIO_DIR/saves/$FACTORIO_SAVE_NAME.zip"
+    else
+        echo $FACTORIO_SAVE_NAME is the newest save, no auto-save restoration
+    fi
 fi
+rm -f "$FACTORIO_DIR/saves/newest_save"
 
 # Check if no save exists, in which case, create one.
 if [ ! -f "$FACTORIO_DIR/saves/$FACTORIO_SAVE_NAME.zip" ]; then
