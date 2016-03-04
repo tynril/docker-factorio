@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo Factorio management script version 1.0.5
+echo Factorio management script version 1.0.6
 
 # Safety checks
 error=0

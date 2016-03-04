@@ -4,11 +4,13 @@ MAINTAINER Samuel Loretan <tynril@gmail.com>
 
 RUN yum install -y git wget
 
-ENV FACTORIO_VERSION 0.12.24
+ENV FACTORIO_VERSION 0.12.25
 ENV FACTORIO_SAVE_NAME DockerSave
 ENV FACTORIO_SERVER_ARGS --autosave-interval 3 --autosave-slots 10 --latency-ms 175 --disallow-commands --peer-to-peer
 ENV GDRIVE_FACTORIO_FOLDER_NAME Factorio
 ENV GDRIVE_UPLOAD_SAVES_FREQUENCY_SEC 180
+
+EXPOSE 34197/udp
 
 ADD utils/factorio.sh /opt/factorio/factorio.sh
 ADD utils/factorio_upload_save.sh /opt/factorio/factorio_upload_save.sh
