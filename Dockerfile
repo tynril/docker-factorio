@@ -4,7 +4,7 @@ MAINTAINER Samuel Loretan <tynril@gmail.com>
 
 RUN yum install -y git wget
 
-ENV FACTORIO_VERSION 0.12.25
+ENV FACTORIO_VERSION 0.12.26
 ENV FACTORIO_SAVE_NAME DockerSave
 ENV FACTORIO_SERVER_ARGS --autosave-interval 3 --autosave-slots 10 --latency-ms 175 --disallow-commands --peer-to-peer
 ENV GDRIVE_FACTORIO_FOLDER_NAME Factorio
