@@ -1,6 +1,7 @@
 #!/bin/bash
 
-echo Factorio management script version 1.0.7
+echo Factorio management script version 1.0.8
+echo Factorio version $FACTORIO_VERSION
 
 # Safety checks
 error=0
@@ -31,15 +32,6 @@ fi
 FACTORIO_DIR=/opt/factorio
 GDRIVE_UTIL="/opt/gdrive --refresh-token $GDRIVE_REFRESH_TOKEN"
 
-# Backup any old save file, and make a new, empty save folder.
-if [ -d "$FACTORIO_DIR/saves_bak" ]; then
-	rm -rf "$FACTORIO_DIR/saves_bak"
-fi
-if [ -d "$FACTORIO_DIR/saves" ]; then
-	mv "$FACTORIO_DIR/saves" "$FACTORIO_DIR/saves_bak"
-fi
-mkdir "$FACTORIO_DIR/saves"
-
 # Look for the root saves folder on Drive
 echo Looking for a Google Drive folder named $GDRIVE_FACTORIO_FOLDER_NAME...
 GDRIVE_FACTORIO_FOLDER_FILE_ID=`$GDRIVE_UTIL list --no-header --query "name = '$GDRIVE_FACTORIO_FOLDER_NAME' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" -m 1 | cut -d " " -f1`
@@ -48,21 +40,49 @@ if [ "$GDRIVE_FACTORIO_FOLDER_FILE_ID" == "" ];then
     exit 1
 fi
 
+# Create the saves folder if it doesn't exist yet.
+mkdir -p "$FACTORIO_DIR/saves"
+
 # Get the latest version of the saves from Google drive
 echo $GDRIVE_FACTORIO_FOLDER_FILE_ID > "$FACTORIO_DIR/saves/downloaded_saves"
 touch -d '-10 years' "$FACTORIO_DIR/saves/newest_save"
 for save in `$GDRIVE_UTIL list --no-header --query "'$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and trashed = false" | cut -d " " -f1`; do
-	filename=`$GDRIVE_UTIL download --no-progress --force --path "$FACTORIO_DIR/saves" $save | head -n 1 | cut -d " " -f2`
+    filename=`$GDRIVE_UTIL info $save | grep Name | cut -d " " -f2`
     checksum=`$GDRIVE_UTIL info $save | grep Md5sum | cut -d " " -f2`
+    
+    # Check if we have a local file with the same name
+    needsDownload=0
+    if [ -f "$FACTORIO_DIR/saves/$filename" ]; then
+        echo Save named $filename already exists locally.
+        localChecksum=`md5sum "$FACTORIO_DIR/saves/$filename" | cut -d " " -f1`
+        if [ "$checksum" == "$localChecksum" ]; then
+            echo The local save is the same, no need to re-download.
+        else
+            echo The local file is different, downloading.
+            needsDownload=1
+        fi
+    else
+        echo No local save named $filename, downloading.
+        needsDownload=1
+    fi
+    
+    # Download the file if needed.
+    if [ $needsDownload == 1 ]; then
+        $GDRIVE_UTIL download --no-progress --force --path "$FACTORIO_DIR/saves" $save
+    fi
+    
+    # Restore the file modification time.
     modifieddate=`$GDRIVE_UTIL info $save | grep Modified | cut -d " " -f2-3`
     modified=`date --date="$modifieddate" +"%s"`
     touch -d @$modified "$FACTORIO_DIR/saves/$filename"
     
+    # Check if this is our most recent save yet.
     if [ "$FACTORIO_DIR/saves/$filename" -nt "$FACTORIO_DIR/saves/newest_save" ]; then
         echo $filename > "$FACTORIO_DIR/saves/newest_save"
         touch -d @$modified "$FACTORIO_DIR/saves/newest_save"
     fi
     
+    # Update the local status file.
     echo Found save file on Google Drive $filename, id $save, checksum $checksum
 	echo $save $filename $checksum >> "$FACTORIO_DIR/saves/downloaded_saves"
 done

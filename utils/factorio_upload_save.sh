@@ -43,7 +43,7 @@ for filename in $FACTORIO_DIR/saves/*.zip; do
     } < "$FACTORIO_DIR/saves/downloaded_saves"
 
     # If we did, update it.
-    storedchecksum=`md5sum $filename | cut -d " " -f1`
+    storedchecksum=`md5sum "$filename" | cut -d " " -f1`
     if [ $found == 1 ]; then
         # Verify if the checksum has changed.
         if [ "$storedchecksum" == "$checksum" ]; then

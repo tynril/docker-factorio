@@ -6,7 +6,7 @@ RUN yum install -y git wget
 
 ENV FACTORIO_VERSION 0.12.26
 ENV FACTORIO_SAVE_NAME DockerSave
-ENV FACTORIO_SERVER_ARGS --autosave-interval 3 --autosave-slots 10 --latency-ms 175 --disallow-commands --peer-to-peer
+ENV FACTORIO_SERVER_ARGS --autosave-interval 3 --autosave-slots 5 --latency-ms 175 --disallow-commands --peer-to-peer
 ENV GDRIVE_FACTORIO_FOLDER_NAME Factorio
 ENV GDRIVE_UPLOAD_SAVES_FREQUENCY_SEC 180
 
