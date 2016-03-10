@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo Factorio management script version 1.0.8
+echo Factorio management script version 1.0.9
 echo Factorio version $FACTORIO_VERSION
 
 # Safety checks
@@ -35,9 +35,19 @@ GDRIVE_UTIL="/opt/gdrive --refresh-token $GDRIVE_REFRESH_TOKEN"
 # Look for the root saves folder on Drive
 echo Looking for a Google Drive folder named $GDRIVE_FACTORIO_FOLDER_NAME...
 GDRIVE_FACTORIO_FOLDER_FILE_ID=`$GDRIVE_UTIL list --no-header --query "name = '$GDRIVE_FACTORIO_FOLDER_NAME' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" -m 1 | cut -d " " -f1`
-if [ "$GDRIVE_FACTORIO_FOLDER_FILE_ID" == "" ];then
+if [ "$GDRIVE_FACTORIO_FOLDER_FILE_ID" == "" ]; then
     echo FATAL: Unable to find a folder named $GDRIVE_FACTORIO_FOLDER_NAME on Google Drive.
     exit 1
+fi
+
+# Look for a mods folder in that directory.
+modsFolder=`$GDRIVE_UTIL list --no-header --query "'$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false" -m 1 | cut -d " " -f1`
+if [ "$modsFolder" != "" ]; then
+    echo Found a mods folder, downloading the mods.
+    mkdir -p "$FACTORIO_DIR/mods"
+    for modFolderId in `$GDRIVE_UTIL list --no-header --query "'$modsFolder' in parents and trashed = false" | cut -d " " -f1`; do
+        $GDRIVE_UTIL download --recursive --no-progress --force --path "$FACTORIO_DIR/mods" $modFolderId
+    done
 fi
 
 # Create the saves folder if it doesn't exist yet.
@@ -46,7 +56,7 @@ mkdir -p "$FACTORIO_DIR/saves"
 # Get the latest version of the saves from Google drive
 echo $GDRIVE_FACTORIO_FOLDER_FILE_ID > "$FACTORIO_DIR/saves/downloaded_saves"
 touch -d '-10 years' "$FACTORIO_DIR/saves/newest_save"
-for save in `$GDRIVE_UTIL list --no-header --query "'$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and trashed = false" | cut -d " " -f1`; do
+for save in `$GDRIVE_UTIL list --no-header --query "'$GDRIVE_FACTORIO_FOLDER_FILE_ID' in parents and trashed = false and mimeType = 'application/zip'" | cut -d " " -f1`; do
     filename=`$GDRIVE_UTIL info $save | grep Name | cut -d " " -f2`
     checksum=`$GDRIVE_UTIL info $save | grep Md5sum | cut -d " " -f2`
     
